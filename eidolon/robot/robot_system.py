@@ -96,6 +96,12 @@ class RobotSystem:
                 )
                 await self.brain_client.initialize()
                 await self.brain_client.start()
+                
+                # Present robot configuration to cloud server
+                if self.hardware_manager:
+                    capabilities = self.hardware_manager.get_robot_capabilities()
+                    await self.brain_client.present_robot_config(capabilities)
+                
                 self.system_status["cloud_connected"] = True
             
             self.system_status["initialized"] = True

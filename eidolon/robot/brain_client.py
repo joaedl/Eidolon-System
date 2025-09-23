@@ -319,3 +319,39 @@ class BrainClient:
             })
         
         return status
+    
+    async def present_robot_config(self, capabilities: Dict[str, Any]):
+        """Present robot configuration and capabilities to the cloud server."""
+        if not self.connected:
+            logger.warning("Not connected to cloud server, cannot present config")
+            return
+        
+        try:
+            # Create device info with robot capabilities
+            device_info = {
+                "device_id": self.robot_id,
+                "device_type": "robot",
+                "hardware_version": capabilities.get("robot_info", {}).get("version", "1.0.0"),
+                "firmware_version": "1.0.0",
+                "capabilities": capabilities,
+                "status": "online",
+                "last_seen": time.time()
+            }
+            
+            # Send device registration with capabilities
+            await self._send_device_registration(device_info)
+            
+            logger.info("Robot configuration presented to cloud server", 
+                       robot_id=self.robot_id,
+                       joint_count=capabilities.get("joints", {}).get("count", 0),
+                       camera_count=capabilities.get("cameras", {}).get("count", 0),
+                       sensor_count=capabilities.get("sensors", {}).get("count", 0))
+            
+        except Exception as e:
+            logger.error("Failed to present robot config to cloud server", error=str(e))
+    
+    async def _send_device_registration(self, device_info: Dict[str, Any]):
+        """Send device registration to cloud server."""
+        # This would be implemented with actual gRPC call
+        # For now, just log the registration
+        logger.info("Device registration sent", device_id=device_info["device_id"])

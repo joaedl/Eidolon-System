@@ -1,0 +1,437 @@
+# LeRobot SO100 Arm Configuration
+# Dual-arm humanoid robot with Feetech servo motors
+
+robot:
+  name: "LeRobot SO100"
+  type: "humanoid_dual_arm"
+  version: "1.0.0"
+  description: "LeRobot SO100 dual-arm humanoid robot with Feetech STS3215 servo motors"
+  
+  # Hardware specifications
+  hardware:
+    # Servo motor configuration
+    servo_bus:
+      type: "feetech"
+      port: "/dev/ttyUSB0"  # USB to serial port
+      baudrate: 1000000
+      protocol_version: 0
+      timeout_ms: 1000
+      
+    # Motor mapping for SO100 arm structure
+    motors:
+      # Left arm (6 DOF)
+      left_shoulder_pitch:
+        id: 1
+        name: "left_shoulder_pitch"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-180.0, 180.0]  # degrees
+        velocity_limit: 100.0  # degrees/sec
+        torque_limit: 100.0  # percentage
+        gear_ratio: 1.0
+        offset: 0.0  # degrees
+        direction: 1  # 1 for normal, -1 for inverted
+        
+      left_shoulder_roll:
+        id: 2
+        name: "left_shoulder_roll"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-90.0, 90.0]
+        velocity_limit: 100.0
+        torque_limit: 100.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: 1
+        
+      left_shoulder_yaw:
+        id: 3
+        name: "left_shoulder_yaw"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-180.0, 180.0]
+        velocity_limit: 100.0
+        torque_limit: 100.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: 1
+        
+      left_elbow:
+        id: 4
+        name: "left_elbow"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-150.0, 150.0]
+        velocity_limit: 100.0
+        torque_limit: 100.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: 1
+        
+      left_wrist_pitch:
+        id: 5
+        name: "left_wrist_pitch"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-90.0, 90.0]
+        velocity_limit: 100.0
+        torque_limit: 100.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: 1
+        
+      left_wrist_roll:
+        id: 6
+        name: "left_wrist_roll"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-180.0, 180.0]
+        velocity_limit: 100.0
+        torque_limit: 100.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: 1
+        
+      # Right arm (6 DOF) - mirrored configuration
+      right_shoulder_pitch:
+        id: 7
+        name: "right_shoulder_pitch"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-180.0, 180.0]
+        velocity_limit: 100.0
+        torque_limit: 100.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: -1  # Inverted for right arm
+        
+      right_shoulder_roll:
+        id: 8
+        name: "right_shoulder_roll"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-90.0, 90.0]
+        velocity_limit: 100.0
+        torque_limit: 100.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: -1
+        
+      right_shoulder_yaw:
+        id: 9
+        name: "right_shoulder_yaw"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-180.0, 180.0]
+        velocity_limit: 100.0
+        torque_limit: 100.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: -1
+        
+      right_elbow:
+        id: 10
+        name: "right_elbow"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-150.0, 150.0]
+        velocity_limit: 100.0
+        torque_limit: 100.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: -1
+        
+      right_wrist_pitch:
+        id: 11
+        name: "right_wrist_pitch"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-90.0, 90.0]
+        velocity_limit: 100.0
+        torque_limit: 100.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: -1
+        
+      right_wrist_roll:
+        id: 12
+        name: "right_wrist_roll"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-180.0, 180.0]
+        velocity_limit: 100.0
+        torque_limit: 100.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: -1
+
+  # Camera configuration
+  cameras:
+    # Wrist camera (left arm)
+    left_wrist_camera:
+      name: "left_wrist_camera"
+      type: "rgb"
+      device_id: 0  # USB camera device ID
+      resolution: [640, 480]
+      fps: 30
+      position: "left_wrist"
+      mount_offset: [0.0, 0.0, 0.05]  # 5cm forward from wrist
+      mount_rotation: [0.0, 0.0, 0.0]  # No rotation
+      
+    # Wrist camera (right arm)
+    right_wrist_camera:
+      name: "right_wrist_camera"
+      type: "rgb"
+      device_id: 1  # USB camera device ID
+      resolution: [640, 480]
+      fps: 30
+      position: "right_wrist"
+      mount_offset: [0.0, 0.0, 0.05]  # 5cm forward from wrist
+      mount_rotation: [0.0, 0.0, 0.0]  # No rotation
+      
+    # Head camera (optional)
+    head_camera:
+      name: "head_camera"
+      type: "rgb"
+      device_id: 2  # USB camera device ID
+      resolution: [1280, 720]
+      fps: 30
+      position: "head"
+      mount_offset: [0.0, 0.0, 0.1]  # 10cm forward from head
+      mount_rotation: [0.0, 0.0, 0.0]  # No rotation
+      enabled: false  # Optional camera
+
+  # Sensor configuration
+  sensors:
+    # IMU sensor for robot orientation
+    imu:
+      name: "robot_imu"
+      type: "imu"
+      device_id: "/dev/ttyUSB1"  # Additional USB port for IMU
+      update_rate: 100  # Hz
+      position: "torso"
+      mount_offset: [0.0, 0.0, 0.0]
+      mount_rotation: [0.0, 0.0, 0.0]
+      
+    # Force/torque sensors (if available)
+    left_wrist_ft:
+      name: "left_wrist_ft"
+      type: "force_torque"
+      device_id: "/dev/ttyUSB2"
+      update_rate: 100
+      position: "left_wrist"
+      mount_offset: [0.0, 0.0, 0.0]
+      enabled: false  # Optional sensor
+      
+    right_wrist_ft:
+      name: "right_wrist_ft"
+      type: "force_torque"
+      device_id: "/dev/ttyUSB3"
+      update_rate: 100
+      position: "right_wrist"
+      mount_offset: [0.0, 0.0, 0.0]
+      enabled: false  # Optional sensor
+
+  # Safety configuration
+  safety:
+    # Emergency stop configuration
+    emergency_stop:
+      hardware_estop: true
+      software_estop: true
+      estop_timeout: 0.1  # seconds
+      
+    # Joint limits
+    joint_limits:
+      position_tolerance: 5.0  # degrees
+      velocity_tolerance: 10.0  # degrees/sec
+      torque_tolerance: 20.0  # percentage
+      
+    # Collision detection
+    collision_detection:
+      enabled: true
+      force_threshold: 50.0  # Newtons
+      torque_threshold: 5.0  # Nm
+      response: "stop"  # stop, reduce_torque, disable
+      
+    # Workspace limits
+    workspace_limits:
+      enabled: true
+      x_min: -0.8
+      x_max: 0.8
+      y_min: -0.8
+      y_max: 0.8
+      z_min: 0.0
+      z_max: 1.2
+
+  # Control configuration
+  control:
+    # Control modes available
+    modes: ["position", "velocity", "torque", "impedance"]
+    default_mode: "position"
+    
+    # Control parameters
+    position_control:
+      kp: 100.0
+      kd: 10.0
+      ki: 0.0
+      
+    velocity_control:
+      kp: 50.0
+      kd: 5.0
+      ki: 0.0
+      
+    torque_control:
+      max_torque: 100.0
+      torque_ramp: 10.0
+      
+    impedance_control:
+      stiffness: 100.0
+      damping: 10.0
+
+  # Communication configuration
+  communication:
+    # Cloud server connection
+    cloud_server:
+      host: "controller.eidolon.cloud"
+      port: 443
+      use_tls: true
+      device_cert: "/etc/eidolon/device.pem"
+      device_key: "/etc/eidolon/device.key"
+      
+    # Teleoperation
+    teleop:
+      signaling_server: "teleop.eidolon.cloud"
+      signaling_port: 443
+      webrtc_ports: [10000, 10001, 10002]  # UDP ports for WebRTC
+      
+    # Local network
+    local_network:
+      ros2_domain: 42
+      multicast_address: "239.255.0.1"
+      multicast_port: 7400
+
+  # Robot capabilities
+  capabilities:
+    # Low-level functions
+    low_level:
+      - "joint_position_control"
+      - "joint_velocity_control"
+      - "joint_torque_control"
+      - "joint_impedance_control"
+      - "gripper_control"
+      - "emergency_stop"
+      - "home_position"
+      - "calibration"
+      
+    # High-level functions
+    high_level:
+      - "pick_and_place"
+      - "object_manipulation"
+      - "bimanual_coordination"
+      - "teleoperation"
+      - "autonomous_navigation"
+      - "object_detection"
+      - "pose_estimation"
+      - "trajectory_execution"
+      
+    # Perception capabilities
+    perception:
+      - "rgb_camera_streaming"
+      - "object_detection"
+      - "pose_estimation"
+      - "depth_estimation"
+      - "hand_eye_calibration"
+      
+    # Safety capabilities
+    safety:
+      - "collision_detection"
+      - "workspace_monitoring"
+      - "emergency_stop"
+      - "torque_limiting"
+      - "velocity_limiting"
+
+  # Robot dimensions and kinematics
+  kinematics:
+    # Arm lengths (in meters)
+    arm_lengths:
+      upper_arm: 0.3
+      forearm: 0.25
+      wrist: 0.1
+      
+    # Workspace dimensions
+    workspace:
+      reach: 0.6  # meters
+      height: 1.2  # meters
+      width: 1.0  # meters
+      
+    # Base frame
+    base_frame: "base_link"
+    left_arm_base: "left_shoulder_link"
+    right_arm_base: "right_shoulder_link"
+    left_wrist_frame: "left_wrist_link"
+    right_wrist_frame: "right_wrist_link"
+
+  # Calibration data
+  calibration:
+    # Home positions for each joint (degrees)
+    home_positions:
+      left_shoulder_pitch: 0.0
+      left_shoulder_roll: 0.0
+      left_shoulder_yaw: 0.0
+      left_elbow: 0.0
+      left_wrist_pitch: 0.0
+      left_wrist_roll: 0.0
+      right_shoulder_pitch: 0.0
+      right_shoulder_roll: 0.0
+      right_shoulder_yaw: 0.0
+      right_elbow: 0.0
+      right_wrist_pitch: 0.0
+      right_wrist_roll: 0.0
+      
+    # Calibration offsets (degrees)
+    calibration_offsets:
+      left_shoulder_pitch: 0.0
+      left_shoulder_roll: 0.0
+      left_shoulder_yaw: 0.0
+      left_elbow: 0.0
+      left_wrist_pitch: 0.0
+      left_wrist_roll: 0.0
+      right_shoulder_pitch: 0.0
+      right_shoulder_roll: 0.0
+      right_shoulder_yaw: 0.0
+      right_elbow: 0.0
+      right_wrist_pitch: 0.0
+      right_wrist_roll: 0.0
+
+  # Software configuration
+  software:
+    # ROS2 configuration
+    ros2:
+      domain_id: 42
+      node_name: "lerobot_so100"
+      namespace: "robot"
+      
+    # Control loop configuration
+    control_loop:
+      frequency: 100  # Hz
+      timeout: 1.0  # seconds
+      
+    # Data logging
+    logging:
+      enabled: true
+      log_directory: "/var/log/eidolon"
+      log_level: "INFO"
+      max_log_size: "100MB"
+      max_log_files: 10

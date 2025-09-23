@@ -11,6 +11,7 @@ import numpy as np
 import cv2
 
 from .config import RobotConfig, JointConfig, CameraConfig, SensorConfig, MotorType, CameraType, SensorType
+from .feetech import FeetechServoBus, FeetechConfig
 
 logger = structlog.get_logger(__name__)
 
@@ -57,12 +58,163 @@ class MotorController:
         self.target_position = 0.0
         self.target_velocity = 0.0
         self.target_torque = 0.0
+
+
+class FeetechServoController(MotorController):
+    """Feetech servo motor controller for STS3215 servos."""
     
+    def __init__(self, joint_config: JointConfig, servo_bus: Optional[FeetechServoBus] = None):
+        super().__init__(joint_config)
+        self.servo_bus = servo_bus
+        self.resolution = 4096  # STS3215 resolution
+        self.servo_id = getattr(joint_config, 'servo_id', None)
+        
     async def initialize(self):
-        """Initialize the motor controller."""
-        logger.info("Initializing motor controller", joint=self.joint_config.name)
-        # Hardware-specific initialization would go here
+        """Initialize the Feetech servo controller."""
+        logger.info("Initializing Feetech servo controller", joint=self.joint_config.name, servo_id=self.servo_id)
+        
+        if self.servo_bus and self.servo_id is not None:
+            # Set angle limits
+            min_angle = self.joint_config.min_position
+            max_angle = self.joint_config.max_position
+            if hasattr(self.servo_bus, 'set_angle_limits'):
+                self.servo_bus.set_angle_limits(self.servo_id, min_angle, max_angle)
+        
         self.enabled = True
+        logger.info("Feetech servo controller initialized", joint=self.joint_config.name)
+    
+    async def enable(self):
+        """Enable the servo motor."""
+        if self.servo_bus and self.servo_id is not None:
+            if hasattr(self.servo_bus, 'enable_torque'):
+                success = self.servo_bus.enable_torque(self.servo_id, True)
+                if success:
+                    self.enabled = True
+                    logger.debug("Feetech servo enabled", joint=self.joint_config.name, servo_id=self.servo_id)
+                else:
+                    logger.warning("Failed to enable Feetech servo", joint=self.joint_config.name, servo_id=self.servo_id)
+            else:
+                self.enabled = True
+        else:
+            self.enabled = True
+            logger.debug("Feetech servo enabled (mock)", joint=self.joint_config.name)
+    
+    async def disable(self):
+        """Disable the servo motor."""
+        if self.servo_bus and self.servo_id is not None:
+            if hasattr(self.servo_bus, 'enable_torque'):
+                success = self.servo_bus.enable_torque(self.servo_id, False)
+                if success:
+                    self.enabled = False
+                    logger.debug("Feetech servo disabled", joint=self.joint_config.name, servo_id=self.servo_id)
+                else:
+                    logger.warning("Failed to disable Feetech servo", joint=self.joint_config.name, servo_id=self.servo_id)
+            else:
+                self.enabled = False
+        else:
+            self.enabled = False
+            logger.debug("Feetech servo disabled (mock)", joint=self.joint_config.name)
+    
+    async def set_position(self, position: float):
+        """Set target position in degrees."""
+        if not self.enabled:
+            logger.warning("Servo not enabled", joint=self.joint_config.name)
+            return
+        
+        # Clamp to limits
+        position = np.clip(position, self.joint_config.min_position, self.joint_config.max_position)
+        self.target_position = position
+        
+        # Apply offset and direction if available
+        adjusted_position = position
+        if hasattr(self.joint_config, 'offset'):
+            adjusted_position += self.joint_config.offset
+        if hasattr(self.joint_config, 'direction'):
+            adjusted_position *= self.joint_config.direction
+        
+        # Send to Feetech servo
+        if self.servo_bus and self.servo_id is not None:
+            if hasattr(self.servo_bus, 'set_position'):
+                success = self.servo_bus.set_position(self.servo_id, adjusted_position)
+                if not success:
+                    logger.warning("Failed to set servo position", joint=self.joint_config.name, servo_id=self.servo_id)
+        
+        # Update current position for simulation
+        await self._update_position()
+    
+    async def set_velocity(self, velocity: float):
+        """Set target velocity in degrees/second."""
+        if not self.enabled:
+            logger.warning("Servo not enabled", joint=self.joint_config.name)
+            return
+        
+        # Clamp to limits
+        velocity = np.clip(velocity, -self.joint_config.max_velocity, self.joint_config.max_velocity)
+        self.target_velocity = velocity
+        
+        # Convert to Feetech speed format (0-1023, where 0 = max speed)
+        if self.servo_bus and self.servo_id is not None:
+            if hasattr(self.servo_bus, 'set_speed'):
+                speed = int((self.joint_config.max_velocity - abs(velocity)) / self.joint_config.max_velocity * 1023)
+                success = self.servo_bus.set_speed(self.servo_id, speed)
+                if not success:
+                    logger.warning("Failed to set servo speed", joint=self.joint_config.name, servo_id=self.servo_id)
+    
+    async def set_torque(self, torque: float):
+        """Set target torque as percentage of maximum."""
+        if not self.enabled:
+            logger.warning("Servo not enabled", joint=self.joint_config.name)
+            return
+        
+        # Clamp to limits
+        torque = np.clip(torque, -self.joint_config.max_torque, self.joint_config.max_torque)
+        self.target_torque = torque
+        
+        # Convert to Feetech torque format
+        if self.servo_bus and self.servo_id is not None:
+            if hasattr(self.servo_bus, 'set_torque_limit'):
+                torque_percent = int(abs(torque) / self.joint_config.max_torque * 100)
+                success = self.servo_bus.set_torque_limit(self.servo_id, torque_percent)
+                if not success:
+                    logger.warning("Failed to set servo torque", joint=self.joint_config.name, servo_id=self.servo_id)
+    
+    async def _update_position(self):
+        """Update position based on target."""
+        # Read actual position from servo if available
+        if self.servo_bus and self.servo_id is not None:
+            if hasattr(self.servo_bus, 'read_position'):
+                position = self.servo_bus.read_position(self.servo_id)
+                if position is not None:
+                    # Apply inverse offset and direction
+                    adjusted_position = position
+                    if hasattr(self.joint_config, 'direction'):
+                        adjusted_position /= self.joint_config.direction
+                    if hasattr(self.joint_config, 'offset'):
+                        adjusted_position -= self.joint_config.offset
+                    
+                    self.current_position = adjusted_position
+                    return
+        
+        # Fallback to simulation
+        error = self.target_position - self.current_position
+        if abs(error) > 0.01:  # 0.01 degree threshold
+            # Move towards target
+            direction = 1 if error > 0 else -1
+            self.current_position += direction * 0.1  # 0.1 degree/step
+            self.current_velocity = direction * 0.1
+        else:
+            self.current_velocity = 0.0
+    
+    def get_state(self) -> JointState:
+        """Get current joint state."""
+        return JointState(
+            name=self.joint_config.name,
+            position=self.current_position,
+            velocity=self.current_velocity,
+            torque=self.current_torque,
+            temperature=self.current_temperature,
+            timestamp=time.time()
+        )
     
     async def enable(self):
         """Enable the motor."""
@@ -277,22 +429,42 @@ class HardwareManager:
         self.motor_controllers: Dict[str, MotorController] = {}
         self.camera_interfaces: Dict[str, CameraInterface] = {}
         self.sensor_interfaces: Dict[str, SensorInterface] = {}
+        self.servo_bus: Optional[FeetechServoBus] = None
         self.running = False
     
     async def initialize(self):
         """Initialize all hardware components."""
         logger.info("Initializing hardware components", robot=self.robot_config.robot_id)
         
+        # Initialize servo bus if configured
+        if hasattr(self.robot_config, 'servo_bus') and self.robot_config.servo_bus:
+            servo_config = FeetechConfig(
+                port=self.robot_config.servo_bus.get('port', '/dev/ttyUSB0'),
+                baudrate=self.robot_config.servo_bus.get('baudrate', 1000000),
+                mock=self.robot_config.servo_bus.get('mock', False)
+            )
+            self.servo_bus = FeetechServoBus(servo_config)
+            if not self.servo_bus.connect():
+                logger.warning("Failed to connect to servo bus, using mock mode")
+                self.servo_bus = None
+        
         # Initialize motor controllers
         for arm in self.robot_config.arms:
             for joint in arm.joints:
-                controller = MotorController(joint)
+                # Check if this is a Feetech servo
+                if hasattr(joint, 'servo_id') and joint.servo_id is not None:
+                    controller = FeetechServoController(joint, self.servo_bus)
+                else:
+                    controller = MotorController(joint)
                 await controller.initialize()
                 self.motor_controllers[joint.name] = controller
         
         if self.robot_config.head:
             for joint in self.robot_config.head.joints:
-                controller = MotorController(joint)
+                if hasattr(joint, 'servo_id') and joint.servo_id is not None:
+                    controller = FeetechServoController(joint, self.servo_bus)
+                else:
+                    controller = MotorController(joint)
                 await controller.initialize()
                 self.motor_controllers[joint.name] = controller
         
@@ -396,3 +568,80 @@ class HardwareManager:
     def is_hardware_ready(self) -> bool:
         """Check if hardware is ready."""
         return self.running and len(self.motor_controllers) > 0
+    
+    def get_robot_capabilities(self) -> Dict[str, Any]:
+        """Get robot capabilities for presentation to cloud server."""
+        capabilities = {
+            "robot_info": {
+                "name": getattr(self.robot_config, 'name', 'Unknown Robot'),
+                "type": getattr(self.robot_config, 'type', 'unknown'),
+                "version": getattr(self.robot_config, 'version', '1.0.0'),
+                "description": getattr(self.robot_config, 'description', ''),
+                "hardware_ready": self.is_hardware_ready()
+            },
+            "joints": {
+                "count": len(self.motor_controllers),
+                "names": list(self.motor_controllers.keys()),
+                "types": {}
+            },
+            "cameras": {
+                "count": len(self.camera_interfaces),
+                "ids": list(self.camera_interfaces.keys()),
+                "types": {}
+            },
+            "sensors": {
+                "count": len(self.sensor_interfaces),
+                "ids": list(self.sensor_interfaces.keys()),
+                "types": {}
+            },
+            "capabilities": {
+                "low_level": getattr(self.robot_config, 'capabilities', {}).get('low_level', []),
+                "high_level": getattr(self.robot_config, 'capabilities', {}).get('high_level', []),
+                "perception": getattr(self.robot_config, 'capabilities', {}).get('perception', []),
+                "safety": getattr(self.robot_config, 'capabilities', {}).get('safety', [])
+            },
+            "control_modes": getattr(self.robot_config, 'control', {}).get('modes', ['position']),
+            "safety_features": {
+                "emergency_stop": getattr(self.robot_config, 'safety', {}).get('emergency_stop', {}),
+                "joint_limits": getattr(self.robot_config, 'safety', {}).get('joint_limits', {}),
+                "collision_detection": getattr(self.robot_config, 'safety', {}).get('collision_detection', {})
+            },
+            "kinematics": {
+                "arm_lengths": getattr(self.robot_config, 'kinematics', {}).get('arm_lengths', {}),
+                "workspace": getattr(self.robot_config, 'kinematics', {}).get('workspace', {}),
+                "base_frame": getattr(self.robot_config, 'kinematics', {}).get('base_frame', 'base_link')
+            }
+        }
+        
+        # Add joint details
+        for joint_name, controller in self.motor_controllers.items():
+            joint_config = controller.joint_config
+            capabilities["joints"]["types"][joint_name] = {
+                "type": getattr(joint_config, 'joint_type', 'revolute'),
+                "position_limits": [joint_config.min_position, joint_config.max_position],
+                "velocity_limit": joint_config.max_velocity,
+                "torque_limit": joint_config.max_torque,
+                "servo_id": getattr(joint_config, 'servo_id', None),
+                "model": getattr(joint_config, 'model', 'unknown')
+            }
+        
+        # Add camera details
+        for camera_id, camera in self.camera_interfaces.items():
+            camera_config = camera.camera_config
+            capabilities["cameras"]["types"][camera_id] = {
+                "type": camera_config.camera_type.value,
+                "resolution": [camera_config.width, camera_config.height],
+                "fps": camera_config.fps,
+                "position": getattr(camera_config, 'position', 'unknown')
+            }
+        
+        # Add sensor details
+        for sensor_id, sensor in self.sensor_interfaces.items():
+            sensor_config = sensor.sensor_config
+            capabilities["sensors"]["types"][sensor_id] = {
+                "type": sensor_config.sensor_type.value,
+                "update_rate": sensor_config.update_rate,
+                "position": getattr(sensor_config, 'position', 'unknown')
+            }
+        
+        return capabilities

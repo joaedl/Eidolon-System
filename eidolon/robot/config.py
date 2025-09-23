@@ -51,6 +51,12 @@ class JointConfig:
     encoder_resolution: int = 4096
     home_position: float = 0.0
     safety_limits: Dict[str, float] = field(default_factory=dict)
+    # Feetech servo specific fields
+    servo_id: Optional[int] = None
+    joint_type: str = "revolute"
+    model: str = "unknown"
+    offset: float = 0.0
+    direction: int = 1
 
 
 @dataclass
@@ -374,7 +380,153 @@ class RobotConfigManager:
         with open(config_file, 'r') as f:
             data = yaml.safe_load(f)
         
-        return RobotConfig.from_dict(data)
+        # Check if this is a new format YAML config
+        if 'robot' in data:
+            return self._load_yaml_config(data)
+        else:
+            return RobotConfig.from_dict(data)
+    
+    def _load_yaml_config(self, data: Dict[str, Any]) -> RobotConfig:
+        """Load new YAML format configuration."""
+        robot_data = data['robot']
+        
+        # Extract robot info
+        robot_id = robot_data.get('name', 'unknown').lower().replace(' ', '_')
+        robot_name = robot_data.get('name', 'Unknown Robot')
+        robot_type = robot_data.get('type', 'humanoid')
+        version = robot_data.get('version', '1.0.0')
+        description = robot_data.get('description', '')
+        
+        # Extract servo bus configuration
+        servo_bus_config = robot_data.get('hardware', {}).get('servo_bus', {})
+        
+        # Extract motors configuration
+        motors_config = robot_data.get('hardware', {}).get('motors', {})
+        
+        # Create joint configurations
+        joints = []
+        for joint_name, joint_data in motors_config.items():
+            joint = JointConfig(
+                name=joint_name,
+                joint_id=joint_data.get('id', 0),
+                motor_type=MotorType.POSITION,  # Default to position control
+                min_position=joint_data.get('position_limits', [-180.0, 180.0])[0],
+                max_position=joint_data.get('position_limits', [-180.0, 180.0])[1],
+                max_velocity=joint_data.get('velocity_limit', 100.0),
+                max_torque=joint_data.get('torque_limit', 100.0),
+                gear_ratio=joint_data.get('gear_ratio', 1.0),
+                home_position=0.0,
+                servo_id=joint_data.get('id'),
+                joint_type=joint_data.get('joint_type', 'revolute'),
+                model=joint_data.get('model', 'STS3215'),
+                offset=joint_data.get('offset', 0.0),
+                direction=joint_data.get('direction', 1)
+            )
+            joints.append(joint)
+        
+        # Group joints into arms
+        left_arm_joints = [j for j in joints if j.name.startswith('left_')]
+        right_arm_joints = [j for j in joints if j.name.startswith('right_')]
+        head_joints = [j for j in joints if j.name.startswith('head_')]
+        
+        # Create arm configurations
+        arms = []
+        if left_arm_joints:
+            arms.append(ArmConfig("left_arm", "left", left_arm_joints, "left_hand"))
+        if right_arm_joints:
+            arms.append(ArmConfig("right_arm", "right", right_arm_joints, "right_hand"))
+        
+        # Create head configuration
+        head = None
+        if head_joints:
+            # Extract cameras
+            cameras_config = robot_data.get('cameras', {})
+            cameras = []
+            for camera_name, camera_data in cameras_config.items():
+                if camera_data.get('enabled', True):  # Skip disabled cameras
+                    camera = CameraConfig(
+                        name=camera_name,
+                        camera_id=camera_data.get('name', camera_name),
+                        camera_type=CameraType(camera_data.get('type', 'rgb')),
+                        device_path=f"/dev/video{camera_data.get('device_id', 0)}",
+                        width=camera_data.get('resolution', [640, 480])[0],
+                        height=camera_data.get('resolution', [640, 480])[1],
+                        fps=camera_data.get('fps', 30),
+                        position={
+                            "x": camera_data.get('mount_offset', [0, 0, 0])[0],
+                            "y": camera_data.get('mount_offset', [0, 0, 0])[1],
+                            "z": camera_data.get('mount_offset', [0, 0, 0])[2]
+                        }
+                    )
+                    cameras.append(camera)
+            
+            head = HeadConfig("head", "head", head_joints, cameras)
+        
+        # Extract base sensors
+        sensors_config = robot_data.get('sensors', {})
+        base_sensors = []
+        for sensor_name, sensor_data in sensors_config.items():
+            if sensor_data.get('enabled', True):  # Skip disabled sensors
+                sensor = SensorConfig(
+                    name=sensor_name,
+                    sensor_id=sensor_data.get('name', sensor_name),
+                    sensor_type=SensorType(sensor_data.get('type', 'imu')),
+                    device_path=sensor_data.get('device_id', '/dev/ttyUSB0'),
+                    update_rate=sensor_data.get('update_rate', 100.0),
+                    position={
+                        "x": sensor_data.get('mount_offset', [0, 0, 0])[0],
+                        "y": sensor_data.get('mount_offset', [0, 0, 0])[1],
+                        "z": sensor_data.get('mount_offset', [0, 0, 0])[2]
+                    }
+                )
+                base_sensors.append(sensor)
+        
+        # Extract capabilities
+        capabilities = robot_data.get('capabilities', {})
+        
+        # Extract safety configuration
+        safety_config = robot_data.get('safety', {})
+        
+        # Extract control configuration
+        control_config = robot_data.get('control', {})
+        
+        # Extract kinematics
+        kinematics = robot_data.get('kinematics', {})
+        
+        # Create RobotConfig
+        config = RobotConfig(
+            robot_id=robot_id,
+            robot_name=robot_name,
+            robot_type=robot_type,
+            manufacturer="LeRobot",
+            model="SO100",
+            arms=arms,
+            head=head,
+            base_sensors=base_sensors,
+            cloud_enabled=True,
+            local_processing=True,
+            teleop_enabled=True,
+            emergency_stop_enabled=safety_config.get('emergency_stop', {}).get('hardware_estop', True),
+            collision_detection=safety_config.get('collision_detection', {}).get('enabled', True),
+            workspace_limits=safety_config.get('workspace_limits', {}),
+            control_frequency=robot_data.get('software', {}).get('control_loop', {}).get('frequency', 100.0),
+            perception_frequency=30.0,
+            safety_frequency=1000.0,
+            local_ip=robot_data.get('communication', {}).get('local_network', {}).get('multicast_address', '192.168.1.100'),
+            cloud_endpoint=robot_data.get('communication', {}).get('cloud_server', {}).get('host', 'controller.eidolon.cloud:443')
+        )
+        
+        # Add additional attributes for the new format
+        config.name = robot_name
+        config.version = version
+        config.description = description
+        config.servo_bus = servo_bus_config
+        config.capabilities = capabilities
+        config.safety = safety_config
+        config.control = control_config
+        config.kinematics = kinematics
+        
+        return config
     
     def save_config(self, config: RobotConfig, config_name: str):
         """Save robot configuration."""
