@@ -1,0 +1,139 @@
+syntax = "proto3";
+
+package eidolon.device;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
+
+// Device registration and heartbeat messages
+message DeviceInfo {
+  string device_id = 1;
+  string hardware_revision = 2;
+  string firmware_version = 3;
+  string certificate_public_key = 4;
+  string tenant_id = 5;
+  google.protobuf.Timestamp registration_time = 6;
+  map<string, string> capabilities = 7;
+}
+
+message RegisterAck {
+  bool success = 1;
+  string session_token = 2;
+  google.protobuf.Timestamp expires_at = 3;
+  repeated string allowed_services = 4;
+}
+
+message Heartbeat {
+  string device_id = 1;
+  string status = 2; // online, offline, error, maintenance
+  string firmware_version = 3;
+  map<string, string> skill_versions = 4;
+  google.protobuf.Timestamp timestamp = 5;
+  DeviceMetrics metrics = 6;
+}
+
+message HeartbeatAck {
+  bool success = 1;
+  string message = 2;
+  google.protobuf.Timestamp server_time = 3;
+}
+
+// Telemetry and metrics
+message Metric {
+  string name = 1;
+  double value = 2;
+  string unit = 3;
+  google.protobuf.Timestamp timestamp = 4;
+  map<string, string> tags = 5;
+}
+
+message DeviceMetrics {
+  double cpu_usage = 1;
+  double memory_usage = 2;
+  double disk_usage = 3;
+  double network_usage = 4;
+  double battery_level = 5;
+  double temperature = 6;
+  repeated Metric custom_metrics = 7;
+}
+
+message TelemetryMessage {
+  string device_id = 1;
+  int64 timestamp = 2;
+  repeated Metric metrics = 3;
+  bytes keyframe_jpeg = 4; // optional compressed frame
+  string rosbag_chunk_url = 5; // presigned URL for data chunk
+  string session_id = 6;
+  map<string, string> metadata = 7;
+}
+
+message StreamAck {
+  bool success = 1;
+  string message = 2;
+  int64 processed_count = 3;
+}
+
+// Subgoal and planning messages
+message Pose {
+  double x = 1;
+  double y = 2;
+  double z = 3;
+  double qx = 4; // quaternion
+  double qy = 5;
+  double qz = 6;
+  double qw = 7;
+}
+
+message LatentGoal {
+  string goal_id = 1;
+  bytes goal_embedding = 2; // vector representation
+  string description = 3;
+}
+
+message Constraint {
+  string type = 1; // velocity, acceleration, force, safety_zone
+  double value = 2;
+  string unit = 3;
+  google.protobuf.Any parameters = 4;
+}
+
+message Subgoal {
+  string id = 1;
+  oneof target {
+    Pose end_effector = 2;
+    LatentGoal latent_goal = 3;
+  }
+  repeated Constraint constraints = 4;
+  google.protobuf.Timestamp deadline = 5;
+  int32 priority = 6;
+  map<string, string> metadata = 7;
+}
+
+message SubgoalRequest {
+  string device_id = 1;
+  string current_task_id = 2;
+  google.protobuf.Timestamp request_time = 3;
+  map<string, string> context = 4;
+}
+
+// Device service definition
+service DeviceService {
+  rpc Register(DeviceInfo) returns (RegisterAck);
+  rpc Heartbeat(Heartbeat) returns (HeartbeatAck);
+  rpc StreamTelemetry(stream TelemetryMessage) returns (StreamAck);
+  rpc GetSubgoal(SubgoalRequest) returns (Subgoal);
+  rpc AcknowledgeSubgoal(SubgoalAck) returns (AckResponse);
+}
+
+message SubgoalAck {
+  string subgoal_id = 1;
+  string device_id = 2;
+  bool accepted = 3;
+  string reason = 4;
+  google.protobuf.Timestamp timestamp = 5;
+}
+
+message AckResponse {
+  bool success = 1;
+  string message = 2;
+}

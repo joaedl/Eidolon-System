@@ -1,0 +1,1 @@
+"""Remote operator console module."""

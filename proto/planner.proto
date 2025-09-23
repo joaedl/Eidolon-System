@@ -1,0 +1,153 @@
+syntax = "proto3";
+
+package eidolon.planner;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
+
+// Planning and policy messages
+message State {
+  string robot_id = 1;
+  google.protobuf.Timestamp timestamp = 2;
+  Pose current_pose = 3;
+  repeated Obstacle obstacles = 4;
+  repeated Goal goals = 5;
+  map<string, double> sensor_data = 6;
+  string current_task = 7;
+}
+
+message Pose {
+  double x = 1;
+  double y = 2;
+  double z = 3;
+  double qx = 4;
+  double qy = 5;
+  double qz = 6;
+  double qw = 7;
+}
+
+message Obstacle {
+  string id = 1;
+  Pose pose = 2;
+  double radius = 3;
+  string type = 4; // static, dynamic, human
+  double velocity_x = 5;
+  double velocity_y = 6;
+  double velocity_z = 7;
+  google.protobuf.Timestamp last_seen = 8;
+}
+
+message Goal {
+  string id = 1;
+  Pose target_pose = 2;
+  string type = 3; // position, orientation, trajectory
+  double tolerance = 4;
+  int32 priority = 5;
+  google.protobuf.Timestamp deadline = 6;
+}
+
+message Action {
+  string action_type = 1; // move, grasp, release, wait
+  map<string, double> parameters = 2;
+  double confidence = 3;
+  google.protobuf.Timestamp estimated_duration = 4;
+  repeated Constraint constraints = 5;
+}
+
+message Constraint {
+  string type = 1; // velocity, acceleration, force, safety_zone
+  double value = 2;
+  string unit = 3;
+  google.protobuf.Any parameters = 4;
+}
+
+// Policy and model management
+message PolicyVersion {
+  string policy_id = 1;
+  string version = 2;
+  string model_url = 3;
+  string checksum = 4;
+  google.protobuf.Timestamp created_at = 5;
+  string description = 6;
+  map<string, string> metadata = 7;
+}
+
+message ModelRequest {
+  string robot_id = 1;
+  string task_type = 2;
+  string current_policy_version = 3;
+  map<string, string> context = 4;
+}
+
+message ModelResponse {
+  string policy_id = 1;
+  string version = 2;
+  string model_url = 3;
+  string checksum = 4;
+  google.protobuf.Timestamp expires_at = 5;
+  map<string, string> metadata = 6;
+}
+
+// Planning service definition
+service PlannerService {
+  rpc GetNextSubgoal(SubgoalRequest) returns (Subgoal);
+  rpc EvaluateAction(ActionRequest) returns (ActionResponse);
+  rpc GetPolicyVersion(ModelRequest) returns (ModelResponse);
+  rpc UpdatePolicy(PolicyUpdate) returns (PolicyUpdateResponse);
+}
+
+message SubgoalRequest {
+  string robot_id = 1;
+  string task_id = 2;
+  State current_state = 3;
+  repeated Goal goals = 4;
+  map<string, string> context = 5;
+}
+
+message Subgoal {
+  string id = 1;
+  oneof target {
+    Pose end_effector = 2;
+    LatentGoal latent_goal = 3;
+  }
+  repeated Constraint constraints = 4;
+  google.protobuf.Timestamp deadline = 5;
+  int32 priority = 6;
+  map<string, string> metadata = 7;
+}
+
+message LatentGoal {
+  string goal_id = 1;
+  bytes goal_embedding = 2;
+  string description = 3;
+}
+
+message ActionRequest {
+  string robot_id = 1;
+  State current_state = 2;
+  string action_type = 3;
+  map<string, double> parameters = 4;
+}
+
+message ActionResponse {
+  bool success = 1;
+  Action recommended_action = 2;
+  double confidence = 3;
+  string reasoning = 4;
+  repeated string warnings = 5;
+}
+
+message PolicyUpdate {
+  string robot_id = 1;
+  string policy_id = 2;
+  string version = 3;
+  string update_type = 4; // install, activate, rollback
+  map<string, string> parameters = 5;
+}
+
+message PolicyUpdateResponse {
+  bool success = 1;
+  string message = 2;
+  string new_version = 3;
+  google.protobuf.Timestamp effective_at = 4;
+}

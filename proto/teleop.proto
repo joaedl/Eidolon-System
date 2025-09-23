@@ -1,0 +1,132 @@
+syntax = "proto3";
+
+package eidolon.teleop;
+
+import "google/protobuf/timestamp.proto";
+
+// Teleoperation session management
+message CreateSessionReq {
+  string robot_id = 1;
+  string operator_id = 2;
+  string tenant_id = 3;
+  string session_type = 4; // direct, assisted, supervised
+  map<string, string> permissions = 5;
+  google.protobuf.Timestamp expires_at = 6;
+}
+
+message CreateSessionResp {
+  bool success = 1;
+  string session_id = 2;
+  string session_token = 3;
+  TurnCredentials turn_credentials = 4;
+  string sdp_offer = 5; // WebRTC SDP offer
+  repeated string ice_servers = 6;
+  google.protobuf.Timestamp expires_at = 7;
+}
+
+message TurnCredentials {
+  string username = 1;
+  string password = 2;
+  string server = 3;
+  int32 port = 4;
+  google.protobuf.Timestamp expires_at = 5;
+}
+
+message SessionSignal {
+  string session_id = 1;
+  string signal_type = 2; // offer, answer, ice_candidate
+  string signal_data = 3;
+  google.protobuf.Timestamp timestamp = 4;
+}
+
+message SignalAck {
+  bool success = 1;
+  string message = 2;
+  string response_signal = 3; // SDP answer or ICE candidate
+}
+
+// Control messages for teleoperation
+message ControlCommand {
+  string session_id = 1;
+  string command_type = 2; // velocity, position, gripper, emergency_stop
+  map<string, double> parameters = 3;
+  google.protobuf.Timestamp timestamp = 4;
+  string operator_id = 5;
+}
+
+message ControlAck {
+  bool success = 1;
+  string message = 2;
+  google.protobuf.Timestamp processed_at = 3;
+}
+
+// Safety and monitoring
+message SafetyStatus {
+  string robot_id = 1;
+  bool emergency_stop = 2;
+  bool safety_zone_violation = 3;
+  bool communication_lost = 4;
+  double velocity_limit = 5;
+  double force_limit = 6;
+  google.protobuf.Timestamp timestamp = 7;
+}
+
+message SessionRecording {
+  string session_id = 1;
+  string robot_id = 2;
+  string operator_id = 3;
+  google.protobuf.Timestamp start_time = 4;
+  google.protobuf.Timestamp end_time = 5;
+  string recording_url = 6; // presigned URL
+  bool encrypted = 7;
+  string encryption_key_id = 8;
+}
+
+// Teleop service definition
+service TeleopService {
+  rpc CreateSession(CreateSessionReq) returns (CreateSessionResp);
+  rpc Signal(SessionSignal) returns (SignalAck);
+  rpc SendControl(ControlCommand) returns (ControlAck);
+  rpc GetSafetyStatus(string) returns (SafetyStatus); // robot_id
+  rpc EndSession(EndSessionReq) returns (EndSessionResp);
+  rpc StartRecording(StartRecordingReq) returns (StartRecordingResp);
+  rpc StopRecording(StopRecordingReq) returns (StopRecordingResp);
+}
+
+message EndSessionReq {
+  string session_id = 1;
+  string reason = 2;
+  google.protobuf.Timestamp timestamp = 3;
+}
+
+message EndSessionResp {
+  bool success = 1;
+  string message = 2;
+  SessionRecording recording = 3;
+}
+
+message StartRecordingReq {
+  string session_id = 1;
+  bool include_video = 2;
+  bool include_audio = 3;
+  bool include_controls = 4;
+  string encryption_key_id = 5;
+}
+
+message StartRecordingResp {
+  bool success = 1;
+  string recording_id = 2;
+  string message = 3;
+}
+
+message StopRecordingReq {
+  string session_id = 1;
+  string recording_id = 2;
+  google.protobuf.Timestamp timestamp = 3;
+}
+
+message StopRecordingResp {
+  bool success = 1;
+  string message = 2;
+  string recording_url = 3;
+}
