@@ -1,0 +1,333 @@
+robot_id: "robot-001"
+robot_name: "Default Humanoid Robot"
+robot_type: "humanoid"
+manufacturer: "Eidolon"
+model: "v1.0"
+
+arms:
+  - name: "left_arm"
+    arm_id: "left"
+    joints:
+      - name: "left_shoulder_pitch"
+        joint_id: 0
+        motor_type: "position"
+        min_position: -1.57
+        max_position: 1.57
+        max_velocity: 2.0
+        max_torque: 20.0
+        gear_ratio: 100.0
+        encoder_resolution: 4096
+        home_position: 0.0
+        safety_limits:
+          velocity_limit: 1.5
+          torque_limit: 15.0
+      - name: "left_shoulder_roll"
+        joint_id: 1
+        motor_type: "position"
+        min_position: -1.57
+        max_position: 1.57
+        max_velocity: 2.0
+        max_torque: 20.0
+        gear_ratio: 100.0
+        encoder_resolution: 4096
+        home_position: 0.0
+        safety_limits:
+          velocity_limit: 1.5
+          torque_limit: 15.0
+      - name: "left_shoulder_yaw"
+        joint_id: 2
+        motor_type: "position"
+        min_position: -1.57
+        max_position: 1.57
+        max_velocity: 2.0
+        max_torque: 20.0
+        gear_ratio: 100.0
+        encoder_resolution: 4096
+        home_position: 0.0
+        safety_limits:
+          velocity_limit: 1.5
+          torque_limit: 15.0
+      - name: "left_elbow"
+        joint_id: 3
+        motor_type: "position"
+        min_position: -2.0
+        max_position: 2.0
+        max_velocity: 3.0
+        max_torque: 15.0
+        gear_ratio: 100.0
+        encoder_resolution: 4096
+        home_position: 0.0
+        safety_limits:
+          velocity_limit: 2.5
+          torque_limit: 12.0
+      - name: "left_wrist_pitch"
+        joint_id: 4
+        motor_type: "position"
+        min_position: -1.57
+        max_position: 1.57
+        max_velocity: 3.0
+        max_torque: 10.0
+        gear_ratio: 50.0
+        encoder_resolution: 2048
+        home_position: 0.0
+        safety_limits:
+          velocity_limit: 2.5
+          torque_limit: 8.0
+      - name: "left_wrist_roll"
+        joint_id: 5
+        motor_type: "position"
+        min_position: -3.14
+        max_position: 3.14
+        max_velocity: 3.0
+        max_torque: 10.0
+        gear_ratio: 50.0
+        encoder_resolution: 2048
+        home_position: 0.0
+        safety_limits:
+          velocity_limit: 2.5
+          torque_limit: 8.0
+    end_effector: "left_hand"
+    base_position:
+      x: -0.3
+      y: 0.0
+      z: 0.5
+    workspace_limits:
+      x_min: -0.8
+      x_max: 0.2
+      y_min: -0.5
+      y_max: 0.5
+      z_min: 0.0
+      z_max: 1.2
+
+  - name: "right_arm"
+    arm_id: "right"
+    joints:
+      - name: "right_shoulder_pitch"
+        joint_id: 6
+        motor_type: "position"
+        min_position: -1.57
+        max_position: 1.57
+        max_velocity: 2.0
+        max_torque: 20.0
+        gear_ratio: 100.0
+        encoder_resolution: 4096
+        home_position: 0.0
+        safety_limits:
+          velocity_limit: 1.5
+          torque_limit: 15.0
+      - name: "right_shoulder_roll"
+        joint_id: 7
+        motor_type: "position"
+        min_position: -1.57
+        max_position: 1.57
+        max_velocity: 2.0
+        max_torque: 20.0
+        gear_ratio: 100.0
+        encoder_resolution: 4096
+        home_position: 0.0
+        safety_limits:
+          velocity_limit: 1.5
+          torque_limit: 15.0
+      - name: "right_shoulder_yaw"
+        joint_id: 8
+        motor_type: "position"
+        min_position: -1.57
+        max_position: 1.57
+        max_velocity: 2.0
+        max_torque: 20.0
+        gear_ratio: 100.0
+        encoder_resolution: 4096
+        home_position: 0.0
+        safety_limits:
+          velocity_limit: 1.5
+          torque_limit: 15.0
+      - name: "right_elbow"
+        joint_id: 9
+        motor_type: "position"
+        min_position: -2.0
+        max_position: 2.0
+        max_velocity: 3.0
+        max_torque: 15.0
+        gear_ratio: 100.0
+        encoder_resolution: 4096
+        home_position: 0.0
+        safety_limits:
+          velocity_limit: 2.5
+          torque_limit: 12.0
+      - name: "right_wrist_pitch"
+        joint_id: 10
+        motor_type: "position"
+        min_position: -1.57
+        max_position: 1.57
+        max_velocity: 3.0
+        max_torque: 10.0
+        gear_ratio: 50.0
+        encoder_resolution: 2048
+        home_position: 0.0
+        safety_limits:
+          velocity_limit: 2.5
+          torque_limit: 8.0
+      - name: "right_wrist_roll"
+        joint_id: 11
+        motor_type: "position"
+        min_position: -3.14
+        max_position: 3.14
+        max_velocity: 3.0
+        max_torque: 10.0
+        gear_ratio: 50.0
+        encoder_resolution: 2048
+        home_position: 0.0
+        safety_limits:
+          velocity_limit: 2.5
+          torque_limit: 8.0
+    end_effector: "right_hand"
+    base_position:
+      x: 0.3
+      y: 0.0
+      z: 0.5
+    workspace_limits:
+      x_min: -0.2
+      x_max: 0.8
+      y_min: -0.5
+      y_max: 0.5
+      z_min: 0.0
+      z_max: 1.2
+
+head:
+  name: "head"
+  head_id: "head"
+  joints:
+    - name: "head_pan"
+      joint_id: 12
+      motor_type: "position"
+      min_position: -1.57
+      max_position: 1.57
+      max_velocity: 2.0
+      max_torque: 5.0
+      gear_ratio: 50.0
+      encoder_resolution: 2048
+      home_position: 0.0
+      safety_limits:
+        velocity_limit: 1.5
+        torque_limit: 4.0
+    - name: "head_tilt"
+      joint_id: 13
+      motor_type: "position"
+      min_position: -0.5
+      max_position: 0.5
+      max_velocity: 2.0
+      max_torque: 5.0
+      gear_ratio: 50.0
+      encoder_resolution: 2048
+      home_position: 0.0
+      safety_limits:
+        velocity_limit: 1.5
+        torque_limit: 4.0
+  cameras:
+    - name: "main_camera"
+      camera_id: "cam_0"
+      camera_type: "rgb"
+      device_path: "/dev/video0"
+      width: 640
+      height: 480
+      fps: 30
+      depth_range: [0.1, 10.0]
+      calibration_file: "calibration/cam_0.yaml"
+      position:
+        x: 0.0
+        y: 0.0
+        z: 0.1
+      orientation:
+        rx: 0.0
+        ry: 0.0
+        rz: 0.0
+    - name: "depth_camera"
+      camera_id: "cam_1"
+      camera_type: "rgbd"
+      device_path: "/dev/video1"
+      width: 640
+      height: 480
+      fps: 30
+      depth_range: [0.1, 5.0]
+      calibration_file: "calibration/cam_1.yaml"
+      position:
+        x: 0.0
+        y: 0.0
+        z: 0.1
+      orientation:
+        rx: 0.0
+        ry: 0.0
+        rz: 0.0
+  base_position:
+    x: 0.0
+    y: 0.0
+    z: 0.8
+
+base_sensors:
+  - name: "imu"
+    sensor_id: "imu_0"
+    sensor_type: "imu"
+    device_path: "/dev/ttyUSB0"
+    update_rate: 100.0
+    calibration_file: "calibration/imu.yaml"
+    position:
+      x: 0.0
+      y: 0.0
+      z: 0.0
+    orientation:
+      rx: 0.0
+      ry: 0.0
+      rz: 0.0
+  - name: "force_torque_left"
+    sensor_id: "ft_left"
+    sensor_type: "force_torque"
+    device_path: "/dev/ttyUSB1"
+    update_rate: 100.0
+    calibration_file: "calibration/ft_left.yaml"
+    position:
+      x: -0.3
+      y: 0.0
+      z: 0.5
+    orientation:
+      rx: 0.0
+      ry: 0.0
+      rz: 0.0
+  - name: "force_torque_right"
+    sensor_id: "ft_right"
+    sensor_type: "force_torque"
+    device_path: "/dev/ttyUSB2"
+    update_rate: 100.0
+    calibration_file: "calibration/ft_right.yaml"
+    position:
+      x: 0.3
+      y: 0.0
+      z: 0.5
+    orientation:
+      rx: 0.0
+      ry: 0.0
+      rz: 0.0
+
+# System configuration
+cloud_enabled: true
+local_processing: true
+teleop_enabled: true
+emergency_stop_enabled: true
+collision_detection: true
+
+# Workspace limits (meters)
+workspace_limits:
+  x_min: -1.0
+  x_max: 1.0
+  y_min: -1.0
+  y_max: 1.0
+  z_min: 0.0
+  z_max: 2.0
+
+# Performance settings
+control_frequency: 100.0  # Hz
+perception_frequency: 30.0  # Hz
+safety_frequency: 1000.0  # Hz
+
+# Network configuration
+local_ip: "192.168.1.100"
+cloud_endpoint: "controller.eidolon.cloud:443"

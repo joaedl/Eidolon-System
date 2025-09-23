@@ -14,6 +14,45 @@ The system consists of several interconnected modules:
 6. **Data Lake** - Storage, model registry, and MLOps
 7. **Monitoring** - Security, audit, and observability
 
+## 🤖 Enhanced Robot Module
+
+The robot module has been significantly enhanced to support flexible hardware configurations for humanoid robots:
+
+### **Key Features**
+- **Flexible Configuration System**: YAML-based configurations for different robot setups
+- **Hardware Abstraction Layer**: Support for various motor types, cameras, and sensors
+- **Multiple Control Modes**: Position, velocity, torque, and impedance control
+- **Comprehensive Safety**: Hardware safety chains, emergency stops, collision detection
+- **Teleoperation Support**: Real-time control with WebRTC and P2P communication
+- **Local & Cloud Processing**: Flexible deployment options
+
+### **Hardware Support**
+- **Dual-arm humanoid robots** with 6-DOF arms
+- **Head with pan/tilt** and multiple cameras (RGB, RGB-D, stereo)
+- **Various motor types**: Position, velocity, torque control
+- **Comprehensive sensors**: IMU, force-torque, touch, proximity, LIDAR
+- **Flexible deployment**: Raspberry Pi, industrial computers, edge devices
+
+### **Quick Robot Setup**
+```bash
+# Create robot configuration
+python scripts/setup_robot.py --create
+
+# Run robot system
+python scripts/run_robot_enhanced.py --config my_robot
+
+# Run in local-only mode
+python scripts/run_robot_enhanced.py --local-only
+```
+
+### **Configuration Examples**
+- **Humanoid Robot**: Dual arms, head with cameras, IMU sensors
+- **Dual-Arm Manipulator**: Two 6-DOF arms for assembly tasks
+- **Mobile Robot**: Base sensors, navigation cameras
+- **Custom Configurations**: Flexible setup for any robot type
+
+For detailed robot module documentation, see [ROBOT_MODULE.md](ROBOT_MODULE.md).
+
 ## Quick Start
 
 ### Prerequisites
