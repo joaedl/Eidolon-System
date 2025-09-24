@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test script for LeRobot SO100 configuration and hardware integration.
+Test script for LeRobot SO100 and Eidolon001 robot configurations and hardware integration.
 """
 
 import asyncio
@@ -40,14 +40,14 @@ logger = structlog.get_logger(__name__)
 
 
 async def test_config_loading():
-    """Test loading the LeRobot SO100 configuration."""
-    print("🔧 Testing LeRobot SO100 configuration loading...")
+    """Test loading robot configurations."""
+    print("🔧 Testing robot configuration loading...")
     
     try:
         config_manager = RobotConfigManager("config/robots")
         
-        # Test both single and dual arm configurations
-        configs_to_test = ["lerobot_so100", "lerobot_so100_dual"]
+        # Test all LeRobot and Eidolon configurations
+        configs_to_test = ["lerobot_so100", "lerobot_so100_dual", "eidolon001"]
         
         configs = {}
         for config_name in configs_to_test:
@@ -254,7 +254,7 @@ async def test_feetech_connection():
 
 async def main():
     """Main test function."""
-    print("🚀 LeRobot SO100 Configuration Test")
+    print("🚀 Robot Configuration Test")
     print("=" * 50)
     
     # Test configuration loading
@@ -275,6 +275,8 @@ async def main():
     print("   python scripts/run_robot_enhanced.py --config lerobot_so100")
     print("   # Dual arm (12 servos, 2 cameras):")
     print("   python scripts/run_robot_enhanced.py --config lerobot_so100_dual")
+    print("   # Eidolon001 (16 servos, 1 camera, 2 grippers):")
+    print("   python scripts/run_robot_enhanced.py --config eidolon001")
 
 
 if __name__ == "__main__":

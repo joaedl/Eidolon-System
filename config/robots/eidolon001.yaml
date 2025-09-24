@@ -1,0 +1,450 @@
+# Eidolon001 Robot Configuration
+# Dual-arm humanoid robot with 6-DOF arms + grippers, 2-DOF head with camera
+
+robot:
+  name: "Eidolon001"
+  type: "humanoid_dual_arm_gripper"
+  version: "1.0.0"
+  description: "Eidolon001 dual-arm humanoid robot with 6-DOF arms, grippers, and 2-DOF head with camera using Feetech STS3215 servo motors"
+  
+  # Hardware specifications
+  hardware:
+    # Servo motor configuration
+    servo_bus:
+      type: "feetech"
+      port: "/dev/ttyUSB0"  # USB to serial port
+      baudrate: 1000000
+      protocol_version: 0
+      timeout_ms: 1000
+      
+    # Motor mapping for Eidolon001 robot structure
+    motors:
+      # Left arm (6 DOF + gripper)
+      left_shoulder_pitch:
+        id: 1
+        name: "left_shoulder_pitch"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-180.0, 180.0]  # degrees
+        velocity_limit: 100.0  # degrees/sec
+        torque_limit: 100.0  # percentage
+        gear_ratio: 1.0
+        offset: 0.0  # degrees
+        direction: 1  # 1 for normal, -1 for inverted
+        
+      left_shoulder_roll:
+        id: 2
+        name: "left_shoulder_roll"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-90.0, 90.0]
+        velocity_limit: 100.0
+        torque_limit: 100.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: 1
+        
+      left_shoulder_yaw:
+        id: 3
+        name: "left_shoulder_yaw"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-180.0, 180.0]
+        velocity_limit: 100.0
+        torque_limit: 100.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: 1
+        
+      left_elbow:
+        id: 4
+        name: "left_elbow"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-150.0, 150.0]
+        velocity_limit: 100.0
+        torque_limit: 100.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: 1
+        
+      left_wrist_pitch:
+        id: 5
+        name: "left_wrist_pitch"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-90.0, 90.0]
+        velocity_limit: 100.0
+        torque_limit: 100.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: 1
+        
+      left_wrist_roll:
+        id: 6
+        name: "left_wrist_roll"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-180.0, 180.0]
+        velocity_limit: 100.0
+        torque_limit: 100.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: 1
+        
+      left_gripper:
+        id: 7
+        name: "left_gripper"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [0.0, 180.0]  # Gripper open/close
+        velocity_limit: 50.0
+        torque_limit: 50.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: 1
+        
+      # Right arm (6 DOF + gripper)
+      right_shoulder_pitch:
+        id: 8
+        name: "right_shoulder_pitch"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-180.0, 180.0]
+        velocity_limit: 100.0
+        torque_limit: 100.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: -1  # Inverted for right arm
+        
+      right_shoulder_roll:
+        id: 9
+        name: "right_shoulder_roll"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-90.0, 90.0]
+        velocity_limit: 100.0
+        torque_limit: 100.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: -1
+        
+      right_shoulder_yaw:
+        id: 10
+        name: "right_shoulder_yaw"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-180.0, 180.0]
+        velocity_limit: 100.0
+        torque_limit: 100.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: -1
+        
+      right_elbow:
+        id: 11
+        name: "right_elbow"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-150.0, 150.0]
+        velocity_limit: 100.0
+        torque_limit: 100.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: -1
+        
+      right_wrist_pitch:
+        id: 12
+        name: "right_wrist_pitch"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-90.0, 90.0]
+        velocity_limit: 100.0
+        torque_limit: 100.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: -1
+        
+      right_wrist_roll:
+        id: 13
+        name: "right_wrist_roll"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-180.0, 180.0]
+        velocity_limit: 100.0
+        torque_limit: 100.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: -1
+        
+      right_gripper:
+        id: 14
+        name: "right_gripper"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [0.0, 180.0]  # Gripper open/close
+        velocity_limit: 50.0
+        torque_limit: 50.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: -1
+        
+      # Head (2 DOF)
+      head_pan:
+        id: 15
+        name: "head_pan"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-180.0, 180.0]
+        velocity_limit: 50.0
+        torque_limit: 30.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: 1
+        
+      head_tilt:
+        id: 16
+        name: "head_tilt"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-45.0, 45.0]
+        velocity_limit: 50.0
+        torque_limit: 30.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: 1
+
+  # Camera configuration
+  cameras:
+    # Head camera
+    head_camera:
+      name: "head_camera"
+      type: "rgb"
+      device_id: 0  # USB camera device ID
+      resolution: [1280, 720]
+      fps: 30
+      position: "head"
+      mount_offset: [0.0, 0.0, 0.1]  # 10cm forward from head
+      mount_rotation: [0.0, 0.0, 0.0]  # No rotation
+      enabled: true
+
+  # Sensor configuration (no IMU as requested)
+  sensors: {}
+
+  # Safety configuration
+  safety:
+    # Emergency stop configuration
+    emergency_stop:
+      hardware_estop: true
+      software_estop: true
+      estop_timeout: 0.1  # seconds
+      
+    # Joint limits
+    joint_limits:
+      position_tolerance: 5.0  # degrees
+      velocity_tolerance: 10.0  # degrees/sec
+      torque_tolerance: 20.0  # percentage
+      
+    # Collision detection
+    collision_detection:
+      enabled: true
+      force_threshold: 50.0  # Newtons
+      torque_threshold: 5.0  # Nm
+      response: "stop"  # stop, reduce_torque, disable
+      
+    # Workspace limits
+    workspace_limits:
+      enabled: true
+      x_min: -0.8
+      x_max: 0.8
+      y_min: -0.8
+      y_max: 0.8
+      z_min: 0.0
+      z_max: 1.4
+
+  # Control configuration
+  control:
+    # Control modes available
+    modes: ["position", "velocity", "torque", "impedance"]
+    default_mode: "position"
+    
+    # Control parameters
+    position_control:
+      kp: 100.0
+      kd: 10.0
+      ki: 0.0
+      
+    velocity_control:
+      kp: 50.0
+      kd: 5.0
+      ki: 0.0
+      
+    torque_control:
+      max_torque: 100.0
+      torque_ramp: 10.0
+      
+    impedance_control:
+      stiffness: 100.0
+      damping: 10.0
+
+  # Communication configuration
+  communication:
+    # Cloud server connection
+    cloud_server:
+      host: "controller.eidolon.cloud"
+      port: 443
+      use_tls: true
+      device_cert: "/etc/eidolon/device.pem"
+      device_key: "/etc/eidolon/device.key"
+      
+    # Teleoperation
+    teleop:
+      signaling_server: "teleop.eidolon.cloud"
+      signaling_port: 443
+      webrtc_ports: [10000, 10001, 10002]  # UDP ports for WebRTC
+      
+    # Local network
+    local_network:
+      ros2_domain: 42
+      multicast_address: "239.255.0.1"
+      multicast_port: 7400
+
+  # Robot capabilities
+  capabilities:
+    # Low-level functions
+    low_level:
+      - "joint_position_control"
+      - "joint_velocity_control"
+      - "joint_torque_control"
+      - "joint_impedance_control"
+      - "gripper_control"
+      - "emergency_stop"
+      - "home_position"
+      - "calibration"
+      
+    # High-level functions
+    high_level:
+      - "pick_and_place"
+      - "object_manipulation"
+      - "bimanual_coordination"
+      - "teleoperation"
+      - "autonomous_navigation"
+      - "object_detection"
+      - "pose_estimation"
+      - "trajectory_execution"
+      - "gripper_manipulation"
+      
+    # Perception capabilities
+    perception:
+      - "rgb_camera_streaming"
+      - "object_detection"
+      - "pose_estimation"
+      - "depth_estimation"
+      - "hand_eye_calibration"
+      
+    # Safety capabilities
+    safety:
+      - "collision_detection"
+      - "workspace_monitoring"
+      - "emergency_stop"
+      - "torque_limiting"
+      - "velocity_limiting"
+
+  # Robot dimensions and kinematics
+  kinematics:
+    # Arm lengths (in meters)
+    arm_lengths:
+      upper_arm: 0.3
+      forearm: 0.25
+      wrist: 0.1
+      
+    # Workspace dimensions
+    workspace:
+      reach: 0.7  # meters
+      height: 1.4  # meters
+      width: 1.6  # meters
+      
+    # Base frame
+    base_frame: "base_link"
+    left_arm_base: "left_shoulder_link"
+    right_arm_base: "right_shoulder_link"
+    left_wrist_frame: "left_wrist_link"
+    right_wrist_frame: "right_wrist_link"
+    head_base: "head_base_link"
+
+  # Calibration data
+  calibration:
+    # Home positions for each joint (degrees)
+    home_positions:
+      left_shoulder_pitch: 0.0
+      left_shoulder_roll: 0.0
+      left_shoulder_yaw: 0.0
+      left_elbow: 0.0
+      left_wrist_pitch: 0.0
+      left_wrist_roll: 0.0
+      left_gripper: 0.0  # Closed
+      right_shoulder_pitch: 0.0
+      right_shoulder_roll: 0.0
+      right_shoulder_yaw: 0.0
+      right_elbow: 0.0
+      right_wrist_pitch: 0.0
+      right_wrist_roll: 0.0
+      right_gripper: 0.0  # Closed
+      head_pan: 0.0
+      head_tilt: 0.0
+      
+    # Calibration offsets (degrees)
+    calibration_offsets:
+      left_shoulder_pitch: 0.0
+      left_shoulder_roll: 0.0
+      left_shoulder_yaw: 0.0
+      left_elbow: 0.0
+      left_wrist_pitch: 0.0
+      left_wrist_roll: 0.0
+      left_gripper: 0.0
+      right_shoulder_pitch: 0.0
+      right_shoulder_roll: 0.0
+      right_shoulder_yaw: 0.0
+      right_elbow: 0.0
+      right_wrist_pitch: 0.0
+      right_wrist_roll: 0.0
+      right_gripper: 0.0
+      head_pan: 0.0
+      head_tilt: 0.0
+
+  # Software configuration
+  software:
+    # ROS2 configuration
+    ros2:
+      domain_id: 42
+      node_name: "eidolon001"
+      namespace: "robot"
+      
+    # Control loop configuration
+    control_loop:
+      frequency: 100  # Hz
+      timeout: 1.0  # seconds
+      
+    # Data logging
+    logging:
+      enabled: true
+      log_directory: "/var/log/eidolon"
+      log_level: "INFO"
+      max_log_size: "100MB"
+      max_log_files: 10
