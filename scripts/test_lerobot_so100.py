@@ -46,53 +46,59 @@ async def test_config_loading():
     try:
         config_manager = RobotConfigManager("config/robots")
         
-        # Load the LeRobot SO100 configuration
-        config = config_manager.load_config("lerobot_so100")
+        # Test both single and dual arm configurations
+        configs_to_test = ["lerobot_so100", "lerobot_so100_dual"]
         
-        print(f"✅ Configuration loaded successfully!")
-        print(f"   Robot: {config.robot_name} ({config.robot_type})")
-        print(f"   Version: {getattr(config, 'version', 'Unknown')}")
-        print(f"   Description: {getattr(config, 'description', 'No description')}")
+        configs = {}
+        for config_name in configs_to_test:
+            print(f"\n📋 Testing {config_name} configuration...")
+            config = configs[config_name] = config_manager.load_config(config_name)
+            
+            print(f"✅ Configuration loaded successfully!")
+            print(f"   Robot: {config.robot_name} ({config.robot_type})")
+            print(f"   Version: {getattr(config, 'version', 'Unknown')}")
+            print(f"   Description: {getattr(config, 'description', 'No description')}")
+            
+            # Print hardware information
+            print(f"\n🤖 Hardware Configuration:")
+            print(f"   Arms: {len(config.arms)}")
+            for arm in config.arms:
+                print(f"     - {arm.name}: {len(arm.joints)} joints")
+                for joint in arm.joints:
+                    servo_id = getattr(joint, 'servo_id', 'N/A')
+                    print(f"       * {joint.name} (ID: {servo_id}, Model: {getattr(joint, 'model', 'Unknown')})")
+            
+            if config.head:
+                print(f"   Head: {len(config.head.joints)} joints, {len(config.head.cameras)} cameras")
+                for joint in config.head.joints:
+                    servo_id = getattr(joint, 'servo_id', 'N/A')
+                    print(f"     - {joint.name} (ID: {servo_id})")
+                for camera in config.head.cameras:
+                    print(f"     - {camera.name} ({camera.camera_type.value})")
+            
+            print(f"   Base Sensors: {len(config.base_sensors)}")
+            for sensor in config.base_sensors:
+                print(f"     - {sensor.name} ({sensor.sensor_type.value})")
+            
+            # Print servo bus configuration
+            if hasattr(config, 'servo_bus'):
+                servo_bus = config.servo_bus
+                print(f"\n🔌 Servo Bus Configuration:")
+                print(f"   Port: {servo_bus.get('port', 'N/A')}")
+                print(f"   Baudrate: {servo_bus.get('baudrate', 'N/A')}")
+                print(f"   Mock Mode: {servo_bus.get('mock', False)}")
+            
+            # Print capabilities
+            if hasattr(config, 'capabilities'):
+                capabilities = config.capabilities
+                print(f"\n🎯 Robot Capabilities:")
+                print(f"   Low-level: {len(capabilities.get('low_level', []))} functions")
+                print(f"   High-level: {len(capabilities.get('high_level', []))} functions")
+                print(f"   Perception: {len(capabilities.get('perception', []))} capabilities")
+                print(f"   Safety: {len(capabilities.get('safety', []))} features")
         
-        # Print hardware information
-        print(f"\n🤖 Hardware Configuration:")
-        print(f"   Arms: {len(config.arms)}")
-        for arm in config.arms:
-            print(f"     - {arm.name}: {len(arm.joints)} joints")
-            for joint in arm.joints:
-                servo_id = getattr(joint, 'servo_id', 'N/A')
-                print(f"       * {joint.name} (ID: {servo_id}, Model: {getattr(joint, 'model', 'Unknown')})")
-        
-        if config.head:
-            print(f"   Head: {len(config.head.joints)} joints, {len(config.head.cameras)} cameras")
-            for joint in config.head.joints:
-                servo_id = getattr(joint, 'servo_id', 'N/A')
-                print(f"     - {joint.name} (ID: {servo_id})")
-            for camera in config.head.cameras:
-                print(f"     - {camera.name} ({camera.camera_type.value})")
-        
-        print(f"   Base Sensors: {len(config.base_sensors)}")
-        for sensor in config.base_sensors:
-            print(f"     - {sensor.name} ({sensor.sensor_type.value})")
-        
-        # Print servo bus configuration
-        if hasattr(config, 'servo_bus'):
-            servo_bus = config.servo_bus
-            print(f"\n🔌 Servo Bus Configuration:")
-            print(f"   Port: {servo_bus.get('port', 'N/A')}")
-            print(f"   Baudrate: {servo_bus.get('baudrate', 'N/A')}")
-            print(f"   Mock Mode: {servo_bus.get('mock', False)}")
-        
-        # Print capabilities
-        if hasattr(config, 'capabilities'):
-            capabilities = config.capabilities
-            print(f"\n🎯 Robot Capabilities:")
-            print(f"   Low-level: {len(capabilities.get('low_level', []))} functions")
-            print(f"   High-level: {len(capabilities.get('high_level', []))} functions")
-            print(f"   Perception: {len(capabilities.get('perception', []))} capabilities")
-            print(f"   Safety: {len(capabilities.get('safety', []))} features")
-        
-        return config
+        # Return the single arm config for further testing
+        return configs.get("lerobot_so100")
         
     except Exception as e:
         print(f"❌ Failed to load configuration: {e}")
@@ -264,8 +270,11 @@ async def main():
     await test_feetech_connection()
     
     print("\n🎉 All tests completed!")
-    print("\nTo run the robot system with this configuration:")
+    print("\nTo run the robot system with different configurations:")
+    print("   # Single arm (6 servos, 1 camera):")
     print("   python scripts/run_robot_enhanced.py --config lerobot_so100")
+    print("   # Dual arm (12 servos, 2 cameras):")
+    print("   python scripts/run_robot_enhanced.py --config lerobot_so100_dual")
 
 
 if __name__ == "__main__":

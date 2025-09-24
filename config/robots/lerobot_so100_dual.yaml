@@ -1,11 +1,11 @@
-# LeRobot SO100 Single Arm Configuration
-# Single-arm robot with Feetech servo motors and one camera
+# LeRobot SO100 Arm Configuration
+# Dual-arm humanoid robot with Feetech servo motors
 
 robot:
-  name: "LeRobot SO100 Single Arm"
-  type: "single_arm"
+  name: "LeRobot SO100"
+  type: "humanoid_dual_arm"
   version: "1.0.0"
-  description: "LeRobot SO100 single-arm robot with Feetech STS3215 servo motors and one camera"
+  description: "LeRobot SO100 dual-arm humanoid robot with Feetech STS3215 servo motors"
   
   # Hardware specifications
   hardware:
@@ -17,12 +17,12 @@ robot:
       protocol_version: 0
       timeout_ms: 1000
       
-    # Motor mapping for SO100 single arm structure
+    # Motor mapping for SO100 arm structure
     motors:
-      # Single arm (6 DOF)
-      shoulder_pitch:
+      # Left arm (6 DOF)
+      left_shoulder_pitch:
         id: 1
-        name: "shoulder_pitch"
+        name: "left_shoulder_pitch"
         type: "servo"
         model: "STS3215"
         joint_type: "revolute"
@@ -33,9 +33,9 @@ robot:
         offset: 0.0  # degrees
         direction: 1  # 1 for normal, -1 for inverted
         
-      shoulder_roll:
+      left_shoulder_roll:
         id: 2
-        name: "shoulder_roll"
+        name: "left_shoulder_roll"
         type: "servo"
         model: "STS3215"
         joint_type: "revolute"
@@ -46,9 +46,9 @@ robot:
         offset: 0.0
         direction: 1
         
-      shoulder_yaw:
+      left_shoulder_yaw:
         id: 3
-        name: "shoulder_yaw"
+        name: "left_shoulder_yaw"
         type: "servo"
         model: "STS3215"
         joint_type: "revolute"
@@ -59,9 +59,9 @@ robot:
         offset: 0.0
         direction: 1
         
-      elbow:
+      left_elbow:
         id: 4
-        name: "elbow"
+        name: "left_elbow"
         type: "servo"
         model: "STS3215"
         joint_type: "revolute"
@@ -72,9 +72,9 @@ robot:
         offset: 0.0
         direction: 1
         
-      wrist_pitch:
+      left_wrist_pitch:
         id: 5
-        name: "wrist_pitch"
+        name: "left_wrist_pitch"
         type: "servo"
         model: "STS3215"
         joint_type: "revolute"
@@ -85,9 +85,9 @@ robot:
         offset: 0.0
         direction: 1
         
-      wrist_roll:
+      left_wrist_roll:
         id: 6
-        name: "wrist_roll"
+        name: "left_wrist_roll"
         type: "servo"
         model: "STS3215"
         joint_type: "revolute"
@@ -97,20 +97,121 @@ robot:
         gear_ratio: 1.0
         offset: 0.0
         direction: 1
+        
+      # Right arm (6 DOF) - mirrored configuration
+      right_shoulder_pitch:
+        id: 7
+        name: "right_shoulder_pitch"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-180.0, 180.0]
+        velocity_limit: 100.0
+        torque_limit: 100.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: -1  # Inverted for right arm
+        
+      right_shoulder_roll:
+        id: 8
+        name: "right_shoulder_roll"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-90.0, 90.0]
+        velocity_limit: 100.0
+        torque_limit: 100.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: -1
+        
+      right_shoulder_yaw:
+        id: 9
+        name: "right_shoulder_yaw"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-180.0, 180.0]
+        velocity_limit: 100.0
+        torque_limit: 100.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: -1
+        
+      right_elbow:
+        id: 10
+        name: "right_elbow"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-150.0, 150.0]
+        velocity_limit: 100.0
+        torque_limit: 100.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: -1
+        
+      right_wrist_pitch:
+        id: 11
+        name: "right_wrist_pitch"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-90.0, 90.0]
+        velocity_limit: 100.0
+        torque_limit: 100.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: -1
+        
+      right_wrist_roll:
+        id: 12
+        name: "right_wrist_roll"
+        type: "servo"
+        model: "STS3215"
+        joint_type: "revolute"
+        position_limits: [-180.0, 180.0]
+        velocity_limit: 100.0
+        torque_limit: 100.0
+        gear_ratio: 1.0
+        offset: 0.0
+        direction: -1
 
   # Camera configuration
   cameras:
-    # Single wrist camera
-    wrist_camera:
-      name: "wrist_camera"
+    # Wrist camera (left arm)
+    left_wrist_camera:
+      name: "left_wrist_camera"
       type: "rgb"
       device_id: 0  # USB camera device ID
       resolution: [640, 480]
       fps: 30
-      position: "wrist"
+      position: "left_wrist"
       mount_offset: [0.0, 0.0, 0.05]  # 5cm forward from wrist
       mount_rotation: [0.0, 0.0, 0.0]  # No rotation
-      enabled: true
+      
+    # Wrist camera (right arm)
+    right_wrist_camera:
+      name: "right_wrist_camera"
+      type: "rgb"
+      device_id: 1  # USB camera device ID
+      resolution: [640, 480]
+      fps: 30
+      position: "right_wrist"
+      mount_offset: [0.0, 0.0, 0.05]  # 5cm forward from wrist
+      mount_rotation: [0.0, 0.0, 0.0]  # No rotation
+      
+    # Head camera (optional)
+    head_camera:
+      name: "head_camera"
+      type: "rgb"
+      device_id: 2  # USB camera device ID
+      resolution: [1280, 720]
+      fps: 30
+      position: "head"
+      mount_offset: [0.0, 0.0, 0.1]  # 10cm forward from head
+      mount_rotation: [0.0, 0.0, 0.0]  # No rotation
+      enabled: false  # Optional camera
 
   # Sensor configuration
   sensors:
@@ -120,10 +221,28 @@ robot:
       type: "imu"
       device_id: "/dev/ttyUSB1"  # Additional USB port for IMU
       update_rate: 100  # Hz
-      position: "base"
+      position: "torso"
       mount_offset: [0.0, 0.0, 0.0]
       mount_rotation: [0.0, 0.0, 0.0]
-      enabled: true
+      
+    # Force/torque sensors (if available)
+    left_wrist_ft:
+      name: "left_wrist_ft"
+      type: "force_torque"
+      device_id: "/dev/ttyUSB2"
+      update_rate: 100
+      position: "left_wrist"
+      mount_offset: [0.0, 0.0, 0.0]
+      enabled: false  # Optional sensor
+      
+    right_wrist_ft:
+      name: "right_wrist_ft"
+      type: "force_torque"
+      device_id: "/dev/ttyUSB3"
+      update_rate: 100
+      position: "right_wrist"
+      mount_offset: [0.0, 0.0, 0.0]
+      enabled: false  # Optional sensor
 
   # Safety configuration
   safety:
@@ -149,12 +268,12 @@ robot:
     # Workspace limits
     workspace_limits:
       enabled: true
-      x_min: -0.6
-      x_max: 0.6
-      y_min: -0.6
-      y_max: 0.6
+      x_min: -0.8
+      x_max: 0.8
+      y_min: -0.8
+      y_max: 0.8
       z_min: 0.0
-      z_max: 1.0
+      z_max: 1.2
 
   # Control configuration
   control:
@@ -220,6 +339,7 @@ robot:
     high_level:
       - "pick_and_place"
       - "object_manipulation"
+      - "bimanual_coordination"
       - "teleoperation"
       - "autonomous_navigation"
       - "object_detection"
@@ -231,6 +351,7 @@ robot:
       - "rgb_camera_streaming"
       - "object_detection"
       - "pose_estimation"
+      - "depth_estimation"
       - "hand_eye_calibration"
       
     # Safety capabilities
@@ -252,40 +373,54 @@ robot:
     # Workspace dimensions
     workspace:
       reach: 0.6  # meters
-      height: 1.0  # meters
-      width: 1.2  # meters
+      height: 1.2  # meters
+      width: 1.0  # meters
       
     # Base frame
     base_frame: "base_link"
-    arm_base: "shoulder_link"
-    wrist_frame: "wrist_link"
+    left_arm_base: "left_shoulder_link"
+    right_arm_base: "right_shoulder_link"
+    left_wrist_frame: "left_wrist_link"
+    right_wrist_frame: "right_wrist_link"
 
   # Calibration data
   calibration:
     # Home positions for each joint (degrees)
     home_positions:
-      shoulder_pitch: 0.0
-      shoulder_roll: 0.0
-      shoulder_yaw: 0.0
-      elbow: 0.0
-      wrist_pitch: 0.0
-      wrist_roll: 0.0
+      left_shoulder_pitch: 0.0
+      left_shoulder_roll: 0.0
+      left_shoulder_yaw: 0.0
+      left_elbow: 0.0
+      left_wrist_pitch: 0.0
+      left_wrist_roll: 0.0
+      right_shoulder_pitch: 0.0
+      right_shoulder_roll: 0.0
+      right_shoulder_yaw: 0.0
+      right_elbow: 0.0
+      right_wrist_pitch: 0.0
+      right_wrist_roll: 0.0
       
     # Calibration offsets (degrees)
     calibration_offsets:
-      shoulder_pitch: 0.0
-      shoulder_roll: 0.0
-      shoulder_yaw: 0.0
-      elbow: 0.0
-      wrist_pitch: 0.0
-      wrist_roll: 0.0
+      left_shoulder_pitch: 0.0
+      left_shoulder_roll: 0.0
+      left_shoulder_yaw: 0.0
+      left_elbow: 0.0
+      left_wrist_pitch: 0.0
+      left_wrist_roll: 0.0
+      right_shoulder_pitch: 0.0
+      right_shoulder_roll: 0.0
+      right_shoulder_yaw: 0.0
+      right_elbow: 0.0
+      right_wrist_pitch: 0.0
+      right_wrist_roll: 0.0
 
   # Software configuration
   software:
     # ROS2 configuration
     ros2:
       domain_id: 42
-      node_name: "lerobot_so100_single"
+      node_name: "lerobot_so100"
       namespace: "robot"
       
     # Control loop configuration
